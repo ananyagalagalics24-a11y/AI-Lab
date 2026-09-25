@@ -1,0 +1,22 @@
+import random
+RoomA = random.choice(["dirty","clean"])
+RoomB = random.choice(["dirty","clean"])
+position="A"
+roomA=RoomA
+roomB=RoomB
+while roomA == "dirty" or roomB == "dirty":
+    if position=="A":
+      if roomA=="dirty":
+        print("Cleaned Room A and moving right towards roomB")
+        roomA="clean"
+      else:
+        print("Moving right towards roomB")
+      position="B"
+    else:
+      if roomB=="dirty":
+        print("Cleaned Room B and moving left towards roomA")
+        roomB="clean"
+      else:
+        print("Moving left towards roomA")
+      position="A"
+print("All rooms are clean")
