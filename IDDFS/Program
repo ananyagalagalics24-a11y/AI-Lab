@@ -1,0 +1,45 @@
+# Iterative Deepening Search
+
+def dls(graph, node, goal, depth):
+    # Check if goal is reached
+    if node == goal:
+        return True
+
+    # Stop searching at depth limit
+    if depth == 0:
+        return False
+
+    # Explore child nodes
+    for child in graph[node]:
+        if dls(graph, child, goal, depth - 1):
+            return True
+
+    return False
+
+
+def ids(graph, start, goal):
+    depth = 0
+
+    while True:
+        print("Searching at depth:", depth)
+
+        if dls(graph, start, goal, depth):
+            print("Goal found:", goal)
+            return
+
+        depth += 1
+
+
+# Example graph
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F', 'G'],
+    'D': ['H'],
+    'E': ['I'],
+    'F': [],
+    'G': ['J']
+}
+
+# Run IDS
+ids(graph, 'A', 'G')
