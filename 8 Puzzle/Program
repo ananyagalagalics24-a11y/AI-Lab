@@ -1,45 +1,127 @@
-# Iterative Deepening Search
+import heapq
 
-def dls(graph, node, goal, depth):
-    # Check if goal is reached
-    if node == goal:
-        return True
+# Initial state and goal state
+start = (2, 8, 3,
+         1, 6, 4,
+         7, 0, 5)
 
-    # Stop searching at depth limit
-    if depth == 0:
-        return False
-
-    # Explore child nodes
-    for child in graph[node]:
-        if dls(graph, child, goal, depth - 1):
-            return True
-
-    return False
+goal = (1, 2, 3,
+        8, 0, 4,
+        7, 6, 5)
 
 
-def ids(graph, start, goal):
-    depth = 0
+# Heuristic 1: Misplaced Tiles
+def misplaced(state):
+    count = 0
 
-    while True:
-        print("Searching at depth:", depth)
+    for i in range(9):
+        if state[i] != 0 and state[i] != goal[i]:
+            count += 1
 
-        if dls(graph, start, goal, depth):
-            print("Goal found:", goal)
-            return
-
-        depth += 1
+    return count
 
 
-# Example graph
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F', 'G'],
-    'D': ['H'],
-    'E': ['I'],
-    'F': [],
-    'G': ['J']
-}
+# Heuristic 2: Manhattan Distance
+def manhattan(state):
+    distance = 0
 
-# Run IDS
-ids(graph, 'A', 'G')
+    for i in range(9):
+        tile = state[i]
+
+        if tile != 0:
+            # Current position
+            row1, col1 = i // 3, i % 3
+
+            # Goal position
+            j = goal.index(tile)
+            row2, col2 = j // 3, j % 3
+
+            distance += abs(row1 - row2) + abs(col1 - col2)
+
+    return distance
+
+
+# Generate possible next states
+def get_neighbors(state):
+    neighbors = []
+    zero = state.index(0)
+    row, col = zero // 3, zero % 3
+
+    for dr, dc in [(-1, 0), (1, 0),
+                   (0, -1), (0, 1)]:
+        r, c = row + dr, col + dc
+
+        if 0 <= r < 3 and 0 <= c < 3:
+            pos = r * 3 + c
+            new_state = list(state)
+
+            new_state[zero], new_state[pos] = (
+                new_state[pos], new_state[zero]
+            )
+
+            neighbors.append(tuple(new_state))
+
+    return neighbors
+
+
+# A* search algorithm
+def astar(start, heuristic):
+    pq = [(heuristic(start), 0, start)]
+    parent = {start: None}
+    cost = {start: 0}
+
+    while pq:
+        f, g, current = heapq.heappop(pq)
+
+        if current == goal:
+            path = []
+
+            while current is not None:
+                path.append(current)
+                current = parent[current]
+
+            return path[::-1]
+
+        if g != cost[current]:
+            continue
+
+        for neighbor in get_neighbors(current):
+            new_g = g + 1
+
+            if neighbor not in cost or new_g < cost[neighbor]:
+                cost[neighbor] = new_g
+                parent[neighbor] = current
+
+                new_f = new_g + heuristic(neighbor)
+                heapq.heappush(
+                    pq, (new_f, new_g, neighbor)
+                )
+
+    return None
+
+
+# Choose the heuristic
+choice = input("Choose heuristic (1 or 2): ")
+# 1 = Misplaced Tiles, 2 = Manhattan Distance
+
+if choice == "1":
+    h = misplaced
+elif choice == "2":
+    h = manhattan
+else:
+    print("Invalid choice")
+    exit()
+
+# Solve the puzzle
+solution = astar(start, h)
+
+if solution:
+    print("Number of moves:", len(solution) - 1)
+
+    for step, state in enumerate(solution):
+        print("\nStep", step)
+
+        for i in range(0, 9, 3):
+            print(state[i:i + 3])
+else:
+    print("No solution found")
