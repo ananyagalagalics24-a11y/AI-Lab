@@ -1,0 +1,38 @@
+def is_variable(x):
+    return isinstance(x, str) and x.startswith("?")
+
+def unify(x, y, subs):
+    if x == y:
+        return subs
+
+    if is_variable(x):
+        return {**subs, x: y}
+
+    if is_variable(y):
+        return {**subs, y: x}
+
+    if isinstance(x, tuple) and isinstance(y, tuple):
+        if len(x) != len(y):
+            return None
+
+        for a, b in zip(x, y):
+            subs = unify(a, b, subs)
+            if subs is None:
+                return None
+
+        return subs
+
+    return None
+
+
+# Example
+x = ("Knows", "?x", "?y")
+y = ("Knows", "Ram", "Sita")
+
+result = unify(x, y, {})
+
+if result is not None:
+    print("Unification successful")
+    print("Substitution:", result)
+else:
+    print("Unification failed")
